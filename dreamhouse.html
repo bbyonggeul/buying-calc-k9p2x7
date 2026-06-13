@@ -672,7 +672,8 @@ body::after {
     <div class="step-num">1</div>
     <h2 class="step-title">지금 내가 갖고 있는 목돈은?</h2>
   </div>
-  <span class="step-note">통장 + 주식 + 전세보증금 - 전세대출 + 부모님 확정 지원</span>
+
+
 
   <div class="field-grid-2">
     <div class="field">
@@ -701,7 +702,7 @@ body::after {
     </div>
     <div class="field">
       <label class="field-label">전세대출 (차감)</label>
-      <span class="field-hint">전세보증금에 낀 대출</span>
+      <span class="field-hint">지금 전세에 살고 있다면, 그 보증금에 낀 대출만</span>
       <div class="money-input-wrap">
         <input type="text" inputmode="numeric" class="money-input" id="jeonseLoan" value="0">
         <span class="money-unit">만원</span>
@@ -778,13 +779,6 @@ body::after {
           <span class="money-unit">원</span>
         </div>
       </div>
-      <div class="debt-row">
-        <span class="debt-label">전세대출 월 이자 (1주택자)</span>
-        <div class="money-input-wrap small">
-          <input type="text" inputmode="numeric" class="money-input" id="debt6" value="0">
-          <span class="money-unit">원</span>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -795,7 +789,6 @@ body::after {
     <div class="step-num">3</div>
     <h2 class="step-title">내 드림하우스 정보를 입력하세요!</h2>
   </div>
-  <span class="step-note">담보가치는 매매가·KB시세 둘 중 작은 값으로 자동 적용돼요</span>
 
   <div class="field-grid-2">
     <div class="field">
@@ -845,7 +838,6 @@ body::after {
     <div class="step-num">4</div>
     <h2 class="step-title">보금자리론 받을 수 있을지 알아보기</h2>
   </div>
-  <span class="step-note">생애최초·다자녀·전세사기는 보금자리론 한도 늘어나요</span>
 
   <div class="field">
     <label class="field-label">생애최초 / 무주택 여부</label>
@@ -912,7 +904,6 @@ body::after {
     <div class="step-num">5</div>
     <h2 class="step-title">대출 조건</h2>
   </div>
-  <span class="step-note">변동형이 한도는 적게 나오지만 금리는 보통 더 낮아요</span>
 
   <div class="field-grid-2">
     <div class="field">
@@ -953,7 +944,6 @@ body::after {
     <div class="step-num">6</div>
     <h2 class="step-title">추가 자금 가정</h2>
   </div>
-  <span class="step-note">비상금 + 가전·가구는 매매 외 따로 필요한 돈</span>
 
   <div class="field-grid-2">
     <div class="field">
@@ -1139,7 +1129,7 @@ body::after {
 const DEFAULTS = {
   cash: 8000, stock: 2000, jeonseDeposit: 0, jeonseLoan: 0, parentSupport: 0,
   salary: 5000,
-  debt1: 0, debt2: 0, debt3: 0, debt4: 0, debt5: 0, debt6: 0,
+  debt1: 0, debt2: 0, debt3: 0, debt4: 0, debt5: 0,
   price: 90000, kbPrice: 88000, area: 84,
   zone: 'normal',
   firstHome: 'X', noHouse: 'O', coupleIncome: 5000, loanType: 'general',
@@ -1203,7 +1193,7 @@ function autoLoad() {
 // money input (천 단위 콤마 자동)
 const moneyIds = [
   'cash', 'stock', 'jeonseDeposit', 'jeonseLoan', 'parentSupport',
-  'salary', 'debt1', 'debt2', 'debt3', 'debt4', 'debt5', 'debt6',
+  'salary', 'debt1', 'debt2', 'debt3', 'debt4', 'debt5',
   'price', 'kbPrice', 'coupleIncome', 'furniture', 'monthlyExpense'
 ];
 moneyIds.forEach(id => {
@@ -1302,7 +1292,7 @@ function compute() {
   document.getElementById('seedTotal').innerHTML = `${fmt(seed)}<span class="unit">만원</span>`;
 
   // 2. 부채 월합
-  const debtMonthly = s.debt1 + s.debt2 + s.debt3 + s.debt4 + s.debt5 + s.debt6;
+  const debtMonthly = s.debt1 + s.debt2 + s.debt3 + s.debt4 + s.debt5;
 
   // 3. 담보가치 (매매가, KB시세 중 작은 값)
   const collateral = Math.min(s.price, s.kbPrice);
