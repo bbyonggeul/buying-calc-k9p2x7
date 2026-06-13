@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="매수가능액 계산기 - 내가 진짜 얼마짜리 집을 살 수 있는지 자동 계산">
+<title>매수가능액 계산기 (뿅글이 제작)</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+@font-face {
+  font-family: 'ShinyebinHandwriting';
+  src: url('ongeullip-shinyebin.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --pink-50: #FFF4F8;
+  --pink-100: #FFE0EC;
+  --pink-200: #FCDFE9;
+  --pink-300: #FBC4D7;
+  --pink-500: #E91E78;
+  --pink-600: #D11668;
+  --pink-700: #B91560;
+  --purple-100: #E8E5F8;
+  --purple-200: #D4CDF0;
+  --purple-300: #B5ADE2;
+  --purple-500: #5D52C9;
+  --purple-700: #4639A8;
+  --lavender: #F0EEFA;
+  --lavender-soft: #F8F6FD;
+  --text-dark: #2C2C3E;
+  --text-mid: #6B6B7A;
+  --text-light: #9999A8;
+  --border-soft: #E6E2F2;
+  --white: #FFFFFF;
+  --danger: #DC4358;
+  --danger-bg: #FDF2F4;
+  --success: #2E9B6B;
+  --success-bg: #EDF8F2;
+  --warning: #C28F2C;
+  --warning-bg: #FAF5E8;
+}
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #F0ECFF 0%, #FDE8F2 40%, #EEF0FF 100%);
+  background-attachment: fixed;
+  color: var(--text-dark);
+  line-height: 1.6;
+  font-size: 15px;
+  padding: 32px 16px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before, body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+body::before {
+  width: 600px; height: 600px;
+  top: -200px; right: -150px;
+  background: radial-gradient(circle, rgba(233,30,120,0.08) 0%, transparent 70%);
+}
+body::after {
+  width: 500px; height: 500px;
+  bottom: -100px; left: -100px;
+  background: radial-gradient(circle, rgba(99,85,216,0.10) 0%, transparent 70%);
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: 20px;
+  padding: 40px 32px;
+  box-shadow: 0 4px 32px rgba(93, 82, 201, 0.08);
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  border-top: 4px solid var(--pink-500);
+  padding-top: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 22px;
+}
+
+.header-tag {
+  display: inline-block;
+  background: var(--pink-50);
+  color: var(--pink-500);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 5px 11px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.header h1 {
+  font-family: 'ShinyebinHandwriting', 'Pretendard', sans-serif;
+  font-size: 36px;
+  font-weight: 400;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+  color: var(--text-dark);
+  line-height: 1.25;
+}
+
+.header .subtitle {
+  font-family: 'ShinyebinHandwriting', 'Pretendard', sans-serif;
+  color: var(--purple-700);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.step {
+  margin-bottom: 32px;
+  scroll-margin-top: 100px;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.step-num {
+  background: var(--pink-500);
+  color: var(--white);
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.step-num.result {
+  background: var(--purple-500);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.step-title {
+  font-family: 'ShinyebinHandwriting', 'Pretendard', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--text-dark);
+}
+
+.step-note {
+  font-family: 'ShinyebinHandwriting', 'Pretendard', sans-serif;
+  font-size: 17px;
+  color: var(--purple-700);
+  margin: 0 0 16px 42px;
+  line-height: 1.5;
+  display: block;
+  letter-spacing: 0.005em;
+}
+.step-note::before {
+  content: '— ';
+  color: var(--pink-500);
+}
+
+.field { margin-bottom: 16px; }
+
+.field-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-dark);
+}
+.field-hint {
+  font-size: 11.5px;
+  color: var(--text-light);
+  margin-bottom: 8px;
+  font-weight: 400;
+  display: block;
+}
+
+/* 2칸 그리드 (모바일에서 1칸) */
+.field-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.money-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border: 1.5px solid var(--border-soft);
+  border-radius: 11px;
+  padding: 8px 14px;
+  transition: all 0.15s ease;
+}
+.money-input-wrap:focus-within {
+  border-color: var(--pink-500);
+  background: var(--pink-50);
+}
+.money-input {
+  flex: 1;
+  border: none;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-dark);
+  background: transparent;
+  text-align: right;
+  letter-spacing: -0.005em;
+  min-width: 0;
+}
+.money-input:focus { outline: none; }
+.money-unit {
+  font-size: 13px;
+  color: var(--text-mid);
+  margin-left: 5px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+/* 작은 입력 (부채 영역) */
+.money-input-wrap.small {
+  padding: 6px 11px;
+}
+.money-input-wrap.small .money-input {
+  font-size: 14.5px;
+}
+.money-input-wrap.small .money-unit {
+  font-size: 11.5px;
+}
+
+/* 라디오 옵션 */
+.opt-grid {
+  display: grid;
+  gap: 8px;
+}
+.opt-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.opt-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.opt {
+  display: block;
+  padding: 13px 15px;
+  background: var(--white);
+  border: 1.5px solid var(--border-soft);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.opt input { display: none; }
+.opt:hover {
+  background: var(--pink-50);
+  border-color: var(--pink-300);
+}
+.opt.selected {
+  background: var(--pink-50);
+  border-color: var(--pink-500);
+}
+.opt-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 3px;
+}
+.opt.selected .opt-title { color: var(--pink-700); }
+.opt-desc {
+  font-size: 11.5px;
+  color: var(--text-mid);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* 부채 그룹 */
+.debt-group {
+  background: var(--lavender-soft);
+  border-radius: 13px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--pink-500);
+}
+.debt-row {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border-soft);
+  align-items: center;
+}
+.debt-row:last-child { border-bottom: none; }
+.debt-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* 종잣돈 합계 박스 */
+.subtotal-box {
+  margin-top: 14px;
+  background: var(--pink-50);
+  border: 1px dashed var(--pink-300);
+  border-radius: 11px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.subtotal-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--pink-700);
+}
+.subtotal-value {
+  font-family: 'ShinyebinHandwriting', 'Pretendard', sans-serif;
+  font-size: 28px;
+  color: var(--pink-700);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.subtotal-value .unit {
+  font-size: 13px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
+  margin-left: 4px;
+  color: var(--pink-600);
+}
+
+/* 결과 영역 */
+.result-section {
+  background: linear-gradient(160deg, var(--lavender-soft), var(--pink-50));
+  border-radius: 18px;
+  padding: 28px 24px;
+  border: 1.5px solid var(--pink-200);
+  margin-top: 32px;
+}
+
+/* 큰 결과 박스 (부족/여유) */
+.verdict-box {
+  text-align: center;
+  padding: 28px 20px 24px;
+  background: var(--white);
+  border-radius: 14px;
+  border: 1.5px solid var(--pink-200);
+  margin-bottom: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.verdict-box.short {
+  background: linear-gradient(160deg, #FFF6F8, #FFEEEF);
+  border-color: var(--danger);
+}
+.verdict-box.ok {
+  background: linear-gradient(160deg, #F4FBF7, #EAF7F0);
+  border-color: var(--success);
+}
+.verdict-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--text-light);
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.verdict-headline {
+  font-family: 'ShinyebinHandwriting', 'Pretendard', sans-serif;
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.verdict-box.short .verdict-headline { color: var(--danger); }
+.verdict-box.ok .verdict-headline { color: var(--success); }
+.verdict-amount {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-top: 6px;
+}
+.verdict-sub {
+  font-size: 12.5px;
+  color: var(--text-mid);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+
+/* 결과 카드 그리드 */
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.r-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-soft);
+}
+.r-card.full { grid-column: 1 / -1; }
+.r-card.highlight {
+  background: var(--pink-50);
+  border-color: var(--pink-300);
+}
+.r-card.highlight .r-card-value { color: var(--pink-700); }
+.r-card-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-mid);
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+.r-card-sub {
+  font-size: 10.5px;
+  color: var(--text-light);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.r-card-value {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-dark);
+  letter-spacing: -0.01em;
+}
+.r-card-value .unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-mid);
+  margin-left: 2px;
+}
+
+/* 결과 섹션 헤더 */
+.r-subhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 10px;
+}
+.r-subhead-tag {
+  display: inline-block;
+  background: var(--purple-100);
+  color: var(--purple-700);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+  border-radius: 5px;
+}
+.r-subhead-title {
+  font-family: 'ShinyebinHandwriting', 'Pretendard', sans-serif;
+  font-size: 17px;
+  color: var(--text-dark);
+}
+
+/* 한도 비교 줄 */
+.compare-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border-soft);
+  font-size: 13px;
+}
+.compare-line:last-of-type { border-bottom: none; }
+.compare-line .name { color: var(--text-mid); font-weight: 600; }
+.compare-line .val { font-weight: 800; color: var(--text-dark); font-variant-numeric: tabular-nums; }
+.compare-line.winner .name { color: var(--pink-700); font-weight: 800; }
+.compare-line.winner .val { color: var(--pink-700); }
+
+/* 부대비용 표 */
+.cost-table {
+  background: var(--white);
+  border-radius: 11px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-soft);
+}
+.cost-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--border-soft);
+  font-size: 13px;
+}
+.cost-row:last-child { border-bottom: none; }
+.cost-row.subtotal { 
+  border-top: 1.5px solid var(--pink-300); 
+  border-bottom: none; 
+  margin-top: 2px;
+  padding-top: 11px;
+}
+.cost-row .name { color: var(--text-dark); font-weight: 600; }
+.cost-row .name .desc { 
+  display: block; 
+  font-size: 10.5px; 
+  color: var(--text-light); 
+  font-weight: 500; 
+  margin-top: 2px;
+}
+.cost-row .val { font-weight: 700; color: var(--text-dark); font-variant-numeric: tabular-nums; }
+.cost-row.subtotal .name { font-weight: 800; color: var(--pink-700); }
+.cost-row.subtotal .val { font-weight: 800; color: var(--pink-700); font-size: 14.5px; }
+
+/* 자격 뱃지 */
+.qualify-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 5px;
+  margin-left: 6px;
+}
+.qualify-badge.ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.qualify-badge.no {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* 액션 바 */
+.action-bar {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 13px 22px;
+  border-radius: 11px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  letter-spacing: -0.005em;
+}
+.btn-primary {
+  background: var(--pink-500);
+  color: var(--white);
+  min-width: 160px;
+}
+.btn-primary:hover {
+  background: var(--pink-600);
+  box-shadow: 0 4px 12px rgba(233,30,120,0.25);
+}
+.btn-reset {
+  background: var(--white);
+  color: var(--text-mid);
+  border: 1.5px solid var(--border-soft);
+  min-width: 140px;
+}
+.btn-reset:hover {
+  background: var(--lavender-soft);
+  border-color: var(--purple-300);
+  color: var(--text-dark);
+}
+
+/* 안내문 */
+.notice-box {
+  margin-top: 24px;
+  background: var(--lavender-soft);
+  border-radius: 11px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--purple-300);
+}
+.notice-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--purple-700);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.notice-text {
+  font-size: 11.5px;
+  color: var(--text-mid);
+  line-height: 1.6;
+  font-weight: 500;
+}
+.notice-text + .notice-text { margin-top: 6px; }
+
+/* Footer */
+.footer-note {
+  margin-top: 22px;
+  padding: 14px 16px;
+  background: var(--lavender-soft);
+  border-radius: 8px;
+  border-left: 2px solid var(--pink-300);
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+.copyright-title {
+  color: var(--text-mid);
+  font-weight: 700;
+  font-size: 10.5px;
+  margin-right: 4px;
+}
+
+/* 워터마크 (캡처 시 보임) */
+.watermark {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  font-family: 'ShinyebinHandwriting', 'Pretendard', sans-serif;
+  font-size: 13px;
+  color: var(--pink-300);
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+@media (max-width: 600px) {
+  body { padding: 16px 8px; }
+  .container { padding: 24px 18px; border-radius: 14px; }
+  .header h1 { font-size: 28px; }
+  .header .subtitle { font-size: 15px; }
+  .step-title { font-size: 19px; }
+  .step-note { font-size: 15px; margin-left: 0; margin-top: 6px; }
+  .field-grid-2 { grid-template-columns: 1fr; gap: 10px; }
+  .opt-grid.cols-2, .opt-grid.cols-3 { grid-template-columns: 1fr; }
+  .result-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .r-card-value { font-size: 16px; }
+  .verdict-headline { font-size: 30px; }
+  .verdict-amount { font-size: 14.5px; }
+  .debt-row { grid-template-columns: 1fr 110px; gap: 6px; }
+  .action-bar { flex-direction: column; align-items: stretch; }
+  .btn { width: 100%; }
+}
+
+@media print {
+  body { background: white; padding: 0; font-size: 11pt; }
+  .container { box-shadow: none; border-radius: 0; padding: 20px; max-width: 100%; }
+  .action-bar { display: none; }
+  .step { page-break-inside: avoid; margin-bottom: 20px; }
+}
+</style>
+</head>
+<body>
+
+<main class="container" id="captureArea">
+
+<header class="header">
+  <span class="header-tag">STEP 5 · 매수가능액</span>
+  <h1>내 드림하우스, 살 수 있을까?</h1>
+  <p class="subtitle">내 상황을 입력하면, 부족한 금액까지 자동으로 계산해드릴게요!</p>
+</header>
+
+<!-- STEP 1: 종잣돈 -->
+<section class="step">
+  <div class="step-header">
+    <div class="step-num">1</div>
+    <h2 class="step-title">지금 내가 갖고 있는 목돈은?</h2>
+  </div>
+  <span class="step-note">통장 + 주식 + 전세보증금 - 전세대출 + 부모님 확정 지원</span>
+
+  <div class="field-grid-2">
+    <div class="field">
+      <label class="field-label">통장 예금</label>
+      <span class="field-hint">보통예금·적금·CMA·파킹통장 합</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="cash" value="8,000">
+        <span class="money-unit">만원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">주식·ETF (매도 가능분)</label>
+      <span class="field-hint">실제 팔아서 집에 쓸 금액만</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="stock" value="2,000">
+        <span class="money-unit">만원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">전세보증금</label>
+      <span class="field-hint">지금 살고 있는 전세 보증금</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="jeonseDeposit" value="0">
+        <span class="money-unit">만원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">전세대출 (차감)</label>
+      <span class="field-hint">전세보증금에 낀 대출</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="jeonseLoan" value="0">
+        <span class="money-unit">만원</span>
+      </div>
+    </div>
+    <div class="field" style="grid-column: 1 / -1;">
+      <label class="field-label">부모님 지원 (확정 금액·시점)</label>
+      <span class="field-hint">약속이 아닌 확정만 적기 — 협의 중인 건 0으로</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="parentSupport" value="0">
+        <span class="money-unit">만원</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="subtotal-box">
+    <span class="subtotal-label">종잣돈 합계</span>
+    <span class="subtotal-value" id="seedTotal">10,000<span class="unit">만원</span></span>
+  </div>
+</section>
+
+<!-- STEP 2: 소득과 부채 -->
+<section class="step">
+  <div class="step-header">
+    <div class="step-num">2</div>
+    <h2 class="step-title">월급과 빚은 얼마 있나요?</h2>
+  </div>
+
+  <div class="field">
+    <label class="field-label">세전 연봉</label>
+    <span class="field-hint">근로자: 원천징수영수증 · 사업자: 소득금액증명원</span>
+    <div class="money-input-wrap">
+      <input type="text" inputmode="numeric" class="money-input" id="salary" value="5,000">
+      <span class="money-unit">만원</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">기존 대출 월 상환액</label>
+    <span class="field-hint">월 단위로 입력 (DSR 한도 계산에 들어가요)</span>
+    <div class="debt-group">
+      <div class="debt-row">
+        <span class="debt-label">신용대출</span>
+        <div class="money-input-wrap small">
+          <input type="text" inputmode="numeric" class="money-input" id="debt1" value="0">
+          <span class="money-unit">원</span>
+        </div>
+      </div>
+      <div class="debt-row">
+        <span class="debt-label">자동차 할부</span>
+        <div class="money-input-wrap small">
+          <input type="text" inputmode="numeric" class="money-input" id="debt2" value="0">
+          <span class="money-unit">원</span>
+        </div>
+      </div>
+      <div class="debt-row">
+        <span class="debt-label">카드론</span>
+        <div class="money-input-wrap small">
+          <input type="text" inputmode="numeric" class="money-input" id="debt3" value="0">
+          <span class="money-unit">원</span>
+        </div>
+      </div>
+      <div class="debt-row">
+        <span class="debt-label">학자금대출</span>
+        <div class="money-input-wrap small">
+          <input type="text" inputmode="numeric" class="money-input" id="debt4" value="0">
+          <span class="money-unit">원</span>
+        </div>
+      </div>
+      <div class="debt-row">
+        <span class="debt-label">마이너스통장 월 이자</span>
+        <div class="money-input-wrap small">
+          <input type="text" inputmode="numeric" class="money-input" id="debt5" value="0">
+          <span class="money-unit">원</span>
+        </div>
+      </div>
+      <div class="debt-row">
+        <span class="debt-label">전세대출 월 이자 (1주택자)</span>
+        <div class="money-input-wrap small">
+          <input type="text" inputmode="numeric" class="money-input" id="debt6" value="0">
+          <span class="money-unit">원</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 3: 위시 집 -->
+<section class="step">
+  <div class="step-header">
+    <div class="step-num">3</div>
+    <h2 class="step-title">내 드림하우스 정보를 입력하세요!</h2>
+  </div>
+  <span class="step-note">담보가치는 매매가·KB시세 둘 중 작은 값으로 자동 적용돼요</span>
+
+  <div class="field-grid-2">
+    <div class="field">
+      <label class="field-label">매매가 (호가)</label>
+      <span class="field-hint">실제 거래되는 가격</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="price" value="90,000">
+        <span class="money-unit">만원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">KB시세 일반가</label>
+      <span class="field-hint">KB부동산 시세 사이트에서 확인</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="kbPrice" value="88,000">
+        <span class="money-unit">만원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">전용면적</label>
+      <span class="field-hint">85㎡ 초과 시 농어촌특별세 0.2% 추가</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="decimal" class="money-input" id="area" value="84">
+        <span class="money-unit">㎡</span>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">규제 지역 여부</label>
+      <span class="field-hint">스트레스 가산금리에 영향</span>
+      <div class="opt-grid cols-2" data-name="zone">
+        <label class="opt selected"><input type="radio" name="zone" value="normal" checked>
+          <div class="opt-title">비규제지역</div>
+          <div class="opt-desc">변동 가산 1.5%</div>
+        </label>
+        <label class="opt"><input type="radio" name="zone" value="regulated">
+          <div class="opt-title">수도권·규제지역</div>
+          <div class="opt-desc">변동 가산 3.0%</div>
+        </label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 4: 차주 조건 -->
+<section class="step">
+  <div class="step-header">
+    <div class="step-num">4</div>
+    <h2 class="step-title">보금자리론 받을 수 있을지 알아보기</h2>
+  </div>
+  <span class="step-note">생애최초·다자녀·전세사기는 보금자리론 한도 늘어나요</span>
+
+  <div class="field">
+    <label class="field-label">생애최초 / 무주택 여부</label>
+    <div class="field-grid-2">
+      <div>
+        <div class="opt-grid cols-2" data-name="firstHome">
+          <label class="opt"><input type="radio" name="firstHome" value="O">
+            <div class="opt-title">생애최초 ⭕</div>
+            <div class="opt-desc">취득세 감면 + 보금자리론 LTV 우대</div>
+          </label>
+          <label class="opt selected"><input type="radio" name="firstHome" value="X" checked>
+            <div class="opt-title">아니야</div>
+            <div class="opt-desc">일반 LTV 적용</div>
+          </label>
+        </div>
+      </div>
+      <div>
+        <div class="opt-grid cols-2" data-name="noHouse">
+          <label class="opt selected"><input type="radio" name="noHouse" value="O" checked>
+            <div class="opt-title">무주택 ⭕</div>
+            <div class="opt-desc">보금자리론 필수 요건</div>
+          </label>
+          <label class="opt"><input type="radio" name="noHouse" value="X">
+            <div class="opt-title">1주택 있음</div>
+            <div class="opt-desc">보금자리론 자격 X</div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">부부합산 연소득</label>
+    <span class="field-hint">보금자리론은 부부합산 7천만원 이하만 자격</span>
+    <div class="money-input-wrap">
+      <input type="text" inputmode="numeric" class="money-input" id="coupleIncome" value="5,000">
+      <span class="money-unit">만원</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">보금자리론 유형</label>
+    <span class="field-hint">다자녀·전세사기는 4억 한도 / 생애최초는 위에서 자동 처리</span>
+    <div class="opt-grid cols-3" data-name="loanType">
+      <label class="opt selected"><input type="radio" name="loanType" value="general" checked>
+        <div class="opt-title">일반</div>
+        <div class="opt-desc">한도 3.6억</div>
+      </label>
+      <label class="opt"><input type="radio" name="loanType" value="multichild">
+        <div class="opt-title">다자녀 (2자녀+)</div>
+        <div class="opt-desc">한도 4억</div>
+      </label>
+      <label class="opt"><input type="radio" name="loanType" value="fraud">
+        <div class="opt-title">전세사기피해자</div>
+        <div class="opt-desc">한도 4억</div>
+      </label>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 5: 대출 조건 -->
+<section class="step">
+  <div class="step-header">
+    <div class="step-num">5</div>
+    <h2 class="step-title">대출 조건</h2>
+  </div>
+  <span class="step-note">변동형이 한도는 적게 나오지만 금리는 보통 더 낮아요</span>
+
+  <div class="field-grid-2">
+    <div class="field">
+      <label class="field-label">금리 유형</label>
+      <div class="opt-grid cols-2" data-name="rateType">
+        <label class="opt selected"><input type="radio" name="rateType" value="variable" checked>
+          <div class="opt-title">변동형</div>
+          <div class="opt-desc">스트레스 가산 적용</div>
+        </label>
+        <label class="opt"><input type="radio" name="rateType" value="fixed">
+          <div class="opt-title">고정형</div>
+          <div class="opt-desc">가산 작음 (0.5%)</div>
+        </label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">대출 기간</label>
+      <span class="field-hint">보통 30년 (30~50년)</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="loanYears" value="30">
+        <span class="money-unit">년</span>
+      </div>
+    </div>
+    <div class="field" style="grid-column: 1 / -1;">
+      <label class="field-label">실제 대출 금리</label>
+      <span class="field-hint">지금 알아본 금리 (예: 4.0)</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="decimal" class="money-input" id="rate" value="4.0">
+        <span class="money-unit">%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 6: 추가 자금 -->
+<section class="step">
+  <div class="step-header">
+    <div class="step-num">6</div>
+    <h2 class="step-title">추가 자금 가정</h2>
+  </div>
+  <span class="step-note">비상금 + 가전·가구는 매매 외 따로 필요한 돈</span>
+
+  <div class="field-grid-2">
+    <div class="field">
+      <label class="field-label">월 생활비</label>
+      <span class="field-hint">비상금 6개월치로 자동 환산</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="monthlyExpense" value="2,500,000">
+        <span class="money-unit">원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">가전·가구 (가정값)</label>
+      <span class="field-hint">신축이면 더 들 수 있음</span>
+      <div class="money-input-wrap">
+        <input type="text" inputmode="numeric" class="money-input" id="furniture" value="1,500">
+        <span class="money-unit">만원</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 결과 -->
+<section class="result-section">
+  <div class="step-header" style="margin-bottom: 18px;">
+    <div class="step-num result">결과</div>
+    <h2 class="step-title">드림하우스, 살 수 있을까?</h2>
+  </div>
+
+  <!-- 큰 결과 박스 -->
+  <div class="verdict-box short" id="verdictBox">
+    <div class="verdict-label">최종 판정</div>
+    <div class="verdict-headline" id="verdictHeadline">계산 중...</div>
+    <div class="verdict-amount" id="verdictAmount"></div>
+    <div class="verdict-sub" id="verdictSub"></div>
+  </div>
+
+  <!-- 한도 비교 -->
+  <div class="r-subhead">
+    <span class="r-subhead-tag">한도</span>
+    <span class="r-subhead-title">받을 수 있는 대출은 얼마?</span>
+  </div>
+
+  <div class="cost-table" style="margin-bottom: 14px;">
+    <div class="compare-line">
+      <span class="name">시중은행 · LTV 한도</span>
+      <span class="val"><span id="rLtv">0</span>만원</span>
+    </div>
+    <div class="compare-line">
+      <span class="name">시중은행 · DSR 한도 (스트레스 금리 반영)</span>
+      <span class="val"><span id="rDsr">0</span>만원</span>
+    </div>
+    <div class="compare-line" id="rBankLine">
+      <span class="name">시중은행 · 진짜 한도</span>
+      <span class="val"><span id="rBank">0</span>만원</span>
+    </div>
+    <div class="compare-line">
+      <span class="name">보금자리론 자격<span id="qualifyBadge" class="qualify-badge no">✗ 미충족</span></span>
+      <span class="val"><span id="rGov">0</span>만원</span>
+    </div>
+  </div>
+
+  <div class="result-grid">
+    <div class="r-card full highlight">
+      <div class="r-card-label">★ 더 유리한 대출 한도</div>
+      <div class="r-card-sub" id="finalLoanSource">시중은행 vs 보금자리론 자동 비교</div>
+      <div class="r-card-value"><span id="finalLoan">0</span><span class="unit">만원</span></div>
+    </div>
+  </div>
+
+  <!-- 부대비용 -->
+  <div class="r-subhead" style="margin-top: 16px;">
+    <span class="r-subhead-tag">부대비용</span>
+    <span class="r-subhead-title">매매가 외에 더 드는 돈</span>
+  </div>
+
+  <div class="cost-table" style="margin-bottom: 14px;">
+    <div class="cost-row">
+      <span class="name">취득세
+        <span class="desc">본세 + 지방교육세 10% + 농특세(85㎡↑) - 생애최초 감면</span>
+      </span>
+      <span class="val"><span id="rTax">0</span>만원</span>
+    </div>
+    <div class="cost-row">
+      <span class="name">중개수수료
+        <span class="desc">서울 6구간 요율 + VAT 10%</span>
+      </span>
+      <span class="val"><span id="rAgent">0</span>만원</span>
+    </div>
+    <div class="cost-row">
+      <span class="name">등기 비용
+        <span class="desc">등록면허세 + 법무사</span>
+      </span>
+      <span class="val"><span id="rReg">0</span>만원</span>
+    </div>
+    <div class="cost-row">
+      <span class="name">근저당 설정
+        <span class="desc">법무사 수수료</span>
+      </span>
+      <span class="val"><span id="rMortgage">0</span>만원</span>
+    </div>
+    <div class="cost-row subtotal">
+      <span class="name">부대비용 합계</span>
+      <span class="val"><span id="rExtraTotal">0</span>만원</span>
+    </div>
+  </div>
+
+  <!-- 필요 현금 -->
+  <div class="r-subhead" style="margin-top: 16px;">
+    <span class="r-subhead-tag">필요 현금</span>
+    <span class="r-subhead-title">통장에 실제로 있어야 할 돈</span>
+  </div>
+
+  <div class="result-grid">
+    <div class="r-card">
+      <div class="r-card-label">매매가 - 대출 한도</div>
+      <div class="r-card-sub">내가 직접 내야 할 돈</div>
+      <div class="r-card-value"><span id="rCashSelf">0</span><span class="unit">만원</span></div>
+    </div>
+    <div class="r-card">
+      <div class="r-card-label">부대비용</div>
+      <div class="r-card-sub">취득세 + 중개 + 등기 + 근저당</div>
+      <div class="r-card-value"><span id="rCashExtra">0</span><span class="unit">만원</span></div>
+    </div>
+    <div class="r-card">
+      <div class="r-card-label">비상금 6개월치</div>
+      <div class="r-card-sub">월 생활비 × 6개월</div>
+      <div class="r-card-value"><span id="rCashEmergency">0</span><span class="unit">만원</span></div>
+    </div>
+    <div class="r-card">
+      <div class="r-card-label">가전·가구</div>
+      <div class="r-card-sub">신축이면 더 들 수 있음</div>
+      <div class="r-card-value"><span id="rCashFurniture">0</span><span class="unit">만원</span></div>
+    </div>
+    <div class="r-card full highlight">
+      <div class="r-card-label">총 필요 현금</div>
+      <div class="r-card-sub">통장에 실제로 있어야 할 돈</div>
+      <div class="r-card-value"><span id="rCashTotal">0</span><span class="unit">만원</span></div>
+    </div>
+  </div>
+
+  <!-- 월 상환 -->
+  <div class="r-subhead" style="margin-top: 16px;">
+    <span class="r-subhead-tag">상환</span>
+    <span class="r-subhead-title">매달 갚아야 할 돈</span>
+  </div>
+
+  <div class="result-grid">
+    <div class="r-card">
+      <div class="r-card-label">월 상환액</div>
+      <div class="r-card-sub">원리금균등 (실제 금리)</div>
+      <div class="r-card-value"><span id="rMonthly">0</span><span class="unit">원</span></div>
+    </div>
+    <div class="r-card">
+      <div class="r-card-label">월급 대비 부담률</div>
+      <div class="r-card-value"><span id="rBurden">0</span><span class="unit">%</span></div>
+    </div>
+  </div>
+
+  <div class="watermark">© 뿅글이 · 강의 전용</div>
+</section>
+
+<div class="action-bar">
+  <button class="btn btn-primary" id="btnCapture">📸 결과 이미지 저장</button>
+  <button class="btn btn-reset" id="btnReset">처음부터 다시</button>
+</div>
+
+<div class="notice-box">
+  <div class="notice-title">주의사항 안내</div>
+  <div class="notice-text">※ 금융당국의 지침은 원론적인 규칙만 정하고 있으며, 구체적인 계산법은 금융회사마다 차이가 있습니다.</div>
+  <div class="notice-text">※ 혼합형·주기형 스트레스 가산금리, 신용대출 스트레스 금리, 대출 종류별 DSR 부채산정 세부 방식은 본 계산기에 단순화되어 있으니 대략적인 조회용으로 적합하며, 정확한 비율은 각 금융회사의 전산 시스템으로 조회를 해보아야 합니다.</div>
+</div>
+
+<div class="footer-note">
+  <span class="copyright-title">© 뿅글이</span>본 자료는 강의 수강생의 학습 목적으로만 사용 가능합니다. 무단 배포·복제·공유 시 저작권법에 따라 법적 조치 대상입니다.
+</div>
+
+</main>
+
+<script>
+// ====================
+// 상태
+// ====================
+const DEFAULTS = {
+  cash: 8000, stock: 2000, jeonseDeposit: 0, jeonseLoan: 0, parentSupport: 0,
+  salary: 5000,
+  debt1: 0, debt2: 0, debt3: 0, debt4: 0, debt5: 0, debt6: 0,
+  price: 90000, kbPrice: 88000, area: 84,
+  zone: 'normal',
+  firstHome: 'X', noHouse: 'O', coupleIncome: 5000, loanType: 'general',
+  rateType: 'variable', loanYears: 30, rate: 4.0,
+  monthlyExpense: 2500000, furniture: 1500
+};
+
+const state = { ...DEFAULTS };
+
+// ====================
+// 유틸
+// ====================
+function parseMoney(str) {
+  return Number(String(str).replace(/[^0-9.]/g, '')) || 0;
+}
+function fmt(n) {
+  return Math.round(Number(n) || 0).toLocaleString('ko-KR');
+}
+function fmtFloat(n, digits = 1) {
+  return (Number(n) || 0).toFixed(digits);
+}
+
+// ====================
+// localStorage 자동 저장
+// ====================
+const SAVE_KEY = 'bbyonggeul_buying_calc_v1';
+function autoSave() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function autoLoad() {
+  try {
+    const saved = localStorage.getItem(SAVE_KEY);
+    if (!saved) return;
+    const obj = JSON.parse(saved);
+    Object.keys(DEFAULTS).forEach(k => {
+      if (obj[k] !== undefined) state[k] = obj[k];
+    });
+    // 화면에 반영
+    Object.keys(state).forEach(k => {
+      const el = document.getElementById(k);
+      if (el && el.tagName === 'INPUT' && el.type === 'text') {
+        el.value = fmt(state[k]);
+      }
+    });
+    // 라디오
+    ['zone', 'firstHome', 'noHouse', 'loanType', 'rateType'].forEach(name => {
+      const radio = document.querySelector(`input[name="${name}"][value="${state[name]}"]`);
+      if (radio) {
+        radio.checked = true;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+          r.closest('.opt').classList.toggle('selected', r.checked);
+        });
+      }
+    });
+  } catch (e) {}
+}
+
+// ====================
+// 입력 처리
+// ====================
+// money input (천 단위 콤마 자동)
+const moneyIds = [
+  'cash', 'stock', 'jeonseDeposit', 'jeonseLoan', 'parentSupport',
+  'salary', 'debt1', 'debt2', 'debt3', 'debt4', 'debt5', 'debt6',
+  'price', 'kbPrice', 'coupleIncome', 'furniture', 'monthlyExpense'
+];
+moneyIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', e => {
+    const raw = parseMoney(e.target.value);
+    state[id] = raw;
+    e.target.value = fmt(raw);
+    compute();
+    autoSave();
+  });
+});
+
+// 소수 허용 input (면적, 금리, 년)
+const floatIds = ['area', 'rate', 'loanYears'];
+floatIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', e => {
+    state[id] = parseFloat(e.target.value) || 0;
+    compute();
+    autoSave();
+  });
+});
+
+// 라디오
+document.querySelectorAll('input[type="radio"]').forEach(r => {
+  r.addEventListener('change', () => {
+    state[r.name] = r.value;
+    document.querySelectorAll(`input[name="${r.name}"]`).forEach(rr => {
+      rr.closest('.opt').classList.toggle('selected', rr.checked);
+    });
+    compute();
+    autoSave();
+  });
+});
+
+// ====================
+// 계산 로직 (v6 엑셀과 동일)
+// ====================
+// 규제값 (시트 2 · 강사 관리 영역, 학생에겐 안 보임)
+const RULES = {
+  // 시중은행
+  ltv: 0.70,                      // LTV 70%
+  dsr: 0.40,                      // DSR 40%
+  stressVarNormal: 0.015,         // 변동형 비수도권 1.5%
+  stressVarRegulated: 0.030,      // 변동형 수도권/규제 3.0%
+  stressFixed: 0.005,             // 고정형 0.5%
+  // 보금자리론
+  bogeumLtvNormal: 0.70,          // LTV 일반/비수도권 70%
+  bogeumLtvFirstHomeNormal: 0.80, // LTV 생애최초 비수도권 80%
+  bogeumLtvRegulated: 0.70,       // LTV 수도권/규제 (생애최초도) 70%
+  bogeumDti: 0.60,                // DTI 60%
+  bogeumLimitGeneral: 36000,      // 일반 한도 3.6억
+  bogeumLimitFirstHome: 42000,    // 생애최초 한도 4.2억
+  bogeumLimitMulti: 40000,        // 다자녀·전세사기 한도 4억
+  bogeumPriceMax: 60000,          // 주택가격 상한 6억
+  bogeumIncomeMax: 7000,          // 부부합산 소득 상한 7000만원
+  // 취득세
+  acqTax6: 0.01,                  // 6억 이하 1%
+  acqTax9: 0.03,                  // 9억 초과 3%
+  // 부대비용
+  regTax: 0.002,                  // 등록면허세 0.2%
+  legalFeeReg: 40,                // 법무사 등기 40만원
+  legalFeeMortgage: 40,           // 법무사 근저당 40만원
+  firstHomeDeduct: 200,           // 생애최초 취득세 감면 200만원
+  // 중개수수료 6구간 (서울 매매)
+  agent: [
+    { upTo: 5000,   rate: 0.006, cap: 25 },   // 5천 미만 0.6%, 한도 25
+    { upTo: 20000,  rate: 0.005, cap: 80 },   // 5천~2억 0.5%, 한도 80
+    { upTo: 90000,  rate: 0.004, cap: 0 },    // 2~9억 0.4%, 한도 없음
+    { upTo: 120000, rate: 0.005, cap: 0 },    // 9~12억 0.5%
+    { upTo: 150000, rate: 0.006, cap: 0 },    // 12~15억 0.6%
+    { upTo: Infinity, rate: 0.007, cap: 0 }   // 15억 이상 0.7%
+  ]
+};
+
+// PV 함수 (엑셀 PV 동일): -PV(rate, nper, pmt)
+function PV(rate, nper, pmt) {
+  if (rate === 0) return pmt * nper;
+  return pmt * (1 - Math.pow(1 + rate, -nper)) / rate;
+}
+
+// PMT 함수 (엑셀 PMT 동일): -PMT(rate, nper, pv)
+function PMT(rate, nper, pv) {
+  if (rate === 0) return pv / nper;
+  return pv * rate / (1 - Math.pow(1 + rate, -nper));
+}
+
+function compute() {
+  const s = state;
+
+  // 1. 종잣돈
+  const seed = s.cash + s.stock + s.jeonseDeposit - s.jeonseLoan + s.parentSupport;
+  document.getElementById('seedTotal').innerHTML = `${fmt(seed)}<span class="unit">만원</span>`;
+
+  // 2. 부채 월합
+  const debtMonthly = s.debt1 + s.debt2 + s.debt3 + s.debt4 + s.debt5 + s.debt6;
+
+  // 3. 담보가치 (매매가, KB시세 중 작은 값)
+  const collateral = Math.min(s.price, s.kbPrice);
+
+  // 4. 시중은행 한도 (P 섹션)
+  // P1. LTV 한도
+  const ltvLimit = collateral * RULES.ltv;
+
+  // P3. DSR 한도 (스트레스 가산 반영)
+  const stressVar = s.zone === 'regulated' ? RULES.stressVarRegulated : RULES.stressVarNormal;
+  const stressRate = s.rateType === 'fixed' ? RULES.stressFixed : stressVar;
+  const monthlyLimit = (s.salary * 10000 * RULES.dsr / 12) - debtMonthly;
+  const reviewRate = (s.rate / 100 + stressRate) / 12;
+  const totalMonths = s.loanYears * 12;
+  const dsrLimit = monthlyLimit > 0
+    ? Math.max(0, PV(reviewRate, totalMonths, monthlyLimit) / 10000)
+    : 0;
+
+  // P4. 시중은행 진짜 한도
+  const bankLoan = Math.min(ltvLimit, dsrLimit);
+
+  document.getElementById('rLtv').textContent = fmt(ltvLimit);
+  document.getElementById('rDsr').textContent = fmt(dsrLimit);
+  document.getElementById('rBank').textContent = fmt(bankLoan);
+
+  // 5. 보금자리론 자격 (Q 섹션)
+  const isQualified = (
+    s.noHouse === 'O' &&
+    s.coupleIncome <= RULES.bogeumIncomeMax &&
+    s.price <= RULES.bogeumPriceMax
+  );
+
+  const qualifyBadge = document.getElementById('qualifyBadge');
+  if (isQualified) {
+    qualifyBadge.className = 'qualify-badge ok';
+    qualifyBadge.textContent = '✓ 충족';
+  } else {
+    qualifyBadge.className = 'qualify-badge no';
+    qualifyBadge.textContent = '✗ 미충족';
+  }
+
+  // 6. 보금자리론 한도 계산
+  let bogeumLoan = 0;
+  if (isQualified) {
+    // LTV: 생애최초 + 비규제 → 80% / 생애최초 + 규제 → 70% / 일반 → 70%
+    let bogeumLtv;
+    if (s.firstHome === 'O') {
+      bogeumLtv = s.zone === 'normal' ? RULES.bogeumLtvFirstHomeNormal : RULES.bogeumLtvRegulated;
+    } else {
+      bogeumLtv = RULES.bogeumLtvNormal;
+    }
+    const bogeumLtvLimit = collateral * bogeumLtv;
+
+    // 한도 상한: 생애최초 > 다자녀/전세사기 > 일반
+    let bogeumLimitCap;
+    if (s.firstHome === 'O') {
+      bogeumLimitCap = RULES.bogeumLimitFirstHome;
+    } else if (s.loanType === 'multichild' || s.loanType === 'fraud') {
+      bogeumLimitCap = RULES.bogeumLimitMulti;
+    } else {
+      bogeumLimitCap = RULES.bogeumLimitGeneral;
+    }
+
+    // DTI 한도
+    const bogeumMonthlyLimit = (s.coupleIncome * 10000 * RULES.bogeumDti / 12) - debtMonthly;
+    const bogeumRate = (s.rate / 100) / 12;
+    const dtiLimit = bogeumMonthlyLimit > 0
+      ? Math.max(0, PV(bogeumRate, totalMonths, bogeumMonthlyLimit) / 10000)
+      : 0;
+
+    bogeumLoan = Math.min(bogeumLtvLimit, bogeumLimitCap, dtiLimit);
+  }
+  document.getElementById('rGov').textContent = fmt(bogeumLoan);
+
+  // 7. 최종 한도 (더 유리한 쪽)
+  const useBogeum = isQualified && bogeumLoan > bankLoan;
+  const finalLoan = useBogeum ? bogeumLoan : bankLoan;
+  document.getElementById('finalLoan').textContent = fmt(finalLoan);
+  document.getElementById('finalLoanSource').textContent = useBogeum
+    ? '보금자리론이 더 유리 (자격 충족)'
+    : '시중은행 일반 주담대';
+
+  // 시중은행이 winner면 highlight
+  const bankLine = document.getElementById('rBankLine');
+  if (useBogeum) {
+    bankLine.classList.remove('winner');
+  } else {
+    bankLine.classList.add('winner');
+  }
+
+  // 8. 부대비용 (R 섹션)
+  // R1. 취득세
+  let baseRate;
+  if (s.price <= 60000) {
+    baseRate = RULES.acqTax6;
+  } else if (s.price <= 90000) {
+    baseRate = (s.price / 15000 - 3) * 0.01;
+  } else {
+    baseRate = RULES.acqTax9;
+  }
+  // 농특세: 85㎡ 초과 시 0.2%
+  const ruralTax = s.area > 85 ? 0.002 : 0;
+  // 본세 × 1.1 (지방교육세 포함) + 농특세
+  let acqTax = s.price * (baseRate * 1.1 + ruralTax);
+  // 생애최초 감면
+  if (s.firstHome === 'O') acqTax -= RULES.firstHomeDeduct;
+  acqTax = Math.max(0, acqTax);
+
+  // R2. 중개수수료 (6구간 + VAT 10%)
+  let agentBase = 0;
+  for (const tier of RULES.agent) {
+    if (s.price < tier.upTo) {
+      agentBase = s.price * tier.rate;
+      if (tier.cap > 0) agentBase = Math.min(agentBase, tier.cap);
+      break;
+    }
+  }
+  const agentFee = agentBase * 1.1;
+
+  // R3. 등기 비용
+  const regFee = s.price * RULES.regTax + RULES.legalFeeReg;
+
+  // R4. 근저당
+  const mortgageFee = RULES.legalFeeMortgage;
+
+  // R5. 합계
+  const extraTotal = acqTax + agentFee + regFee + mortgageFee;
+
+  document.getElementById('rTax').textContent = fmt(acqTax);
+  document.getElementById('rAgent').textContent = fmt(agentFee);
+  document.getElementById('rReg').textContent = fmt(regFee);
+  document.getElementById('rMortgage').textContent = fmt(mortgageFee);
+  document.getElementById('rExtraTotal').textContent = fmt(extraTotal);
+
+  // 9. 필요 현금 (S 섹션)
+  const cashSelf = s.price - finalLoan;
+  const emergency = s.monthlyExpense * 6 / 10000; // 원 → 만원
+  const cashTotal = cashSelf + extraTotal + emergency + s.furniture;
+
+  document.getElementById('rCashSelf').textContent = fmt(cashSelf);
+  document.getElementById('rCashExtra').textContent = fmt(extraTotal);
+  document.getElementById('rCashEmergency').textContent = fmt(emergency);
+  document.getElementById('rCashFurniture').textContent = fmt(s.furniture);
+  document.getElementById('rCashTotal').textContent = fmt(cashTotal);
+
+  // 10. 결론 (T 섹션)
+  const gap = seed - cashTotal;
+  const verdictBox = document.getElementById('verdictBox');
+  const verdictHeadline = document.getElementById('verdictHeadline');
+  const verdictAmount = document.getElementById('verdictAmount');
+  const verdictSub = document.getElementById('verdictSub');
+
+  if (gap >= 0) {
+    verdictBox.className = 'verdict-box ok';
+    verdictHeadline.textContent = '살 수 있어요!';
+    verdictAmount.textContent = `여유 ${fmt(gap)}만원`;
+    verdictSub.textContent = `종잣돈 ${fmt(seed)}만원이 총 필요 현금 ${fmt(cashTotal)}만원보다 ${fmt(gap)}만원 많아요`;
+  } else {
+    verdictBox.className = 'verdict-box short';
+    const shortAmount = Math.abs(gap);
+    // 억 단위 변환
+    const eok = Math.floor(shortAmount / 10000);
+    const cheon = Math.round((shortAmount % 10000) / 1000) * 1000;
+    let displayText;
+    if (eok >= 1) {
+      const cheonPart = cheon > 0 ? ` ${(cheon/1000)}천` : '';
+      displayText = `부족 ${eok}억${cheonPart}만원`;
+    } else {
+      displayText = `부족 ${fmt(shortAmount)}만원`;
+    }
+    verdictHeadline.textContent = displayText;
+    verdictAmount.textContent = `${fmt(shortAmount)}만원 더 필요해요`;
+    verdictSub.textContent = `종잣돈 ${fmt(seed)}만원 / 총 필요 현금 ${fmt(cashTotal)}만원`;
+  }
+
+  // 11. 월 상환액
+  const monthlyRate = (s.rate / 100) / 12;
+  const monthlyPay = finalLoan > 0
+    ? PMT(monthlyRate, totalMonths, finalLoan * 10000)
+    : 0;
+  const monthlySalary = s.salary * 10000 / 12;
+  const burdenRate = monthlySalary > 0 ? (monthlyPay / monthlySalary * 100) : 0;
+
+  document.getElementById('rMonthly').textContent = fmt(monthlyPay);
+  document.getElementById('rBurden').textContent = fmtFloat(burdenRate, 1);
+}
+
+// ====================
+// 이미지 저장
+// ====================
+document.getElementById('btnCapture').addEventListener('click', () => {
+  const btn = document.getElementById('btnCapture');
+  const originalText = btn.textContent;
+  btn.textContent = '저장 중...';
+  btn.disabled = true;
+
+  const target = document.getElementById('captureArea');
+  html2canvas(target, {
+    backgroundColor: '#ffffff',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `매수가능액_계산_${new Date().toISOString().slice(0,10)}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }).catch(err => {
+    console.error(err);
+    btn.textContent = originalText;
+    btn.disabled = false;
+    alert('이미지 저장 실패. 잠시 후 다시 시도해주세요.');
+  });
+});
+
+// ====================
+// 리셋
+// ====================
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (!confirm('입력한 값이 모두 초기화돼요. 계속할까요?')) return;
+  Object.keys(DEFAULTS).forEach(k => state[k] = DEFAULTS[k]);
+  // 화면 반영
+  Object.keys(state).forEach(k => {
+    const el = document.getElementById(k);
+    if (el && el.tagName === 'INPUT' && el.type === 'text') {
+      el.value = fmt(state[k]);
+    }
+  });
+  ['zone', 'firstHome', 'noHouse', 'loanType', 'rateType'].forEach(name => {
+    const radio = document.querySelector(`input[name="${name}"][value="${state[name]}"]`);
+    if (radio) {
+      radio.checked = true;
+      document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+        r.closest('.opt').classList.toggle('selected', r.checked);
+      });
+    }
+  });
+  compute();
+  autoSave();
+});
+
+// ====================
+// 초기화
+// ====================
+autoLoad();
+compute();
+</script>
+
+</body>
+</html>
