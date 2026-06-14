@@ -732,8 +732,8 @@ body::after {
   </div>
 
   <div class="field">
-    <label class="field-label">세전 연봉</label>
-    <span class="field-hint">근로자: 원천징수영수증 · 사업자: 소득금액증명원</span>
+    <label class="field-label">세전 연봉 (단독이면 본인, 부부합산 신청이면 합산)</label>
+    <span class="field-hint">근로자: 원천징수영수증 · 사업자: 소득금액증명원 · 보금자리론 자격은 부부합산 7천 이하만</span>
     <div class="money-input-wrap">
       <input type="text" inputmode="numeric" class="money-input" id="salary" value="5,000">
       <span class="money-unit">만원</span>
@@ -870,15 +870,6 @@ body::after {
   </div>
 
   <div class="field">
-    <label class="field-label">부부합산 연소득</label>
-    <span class="field-hint">보금자리론은 부부합산 7천만원 이하만 자격</span>
-    <div class="money-input-wrap">
-      <input type="text" inputmode="numeric" class="money-input" id="coupleIncome" value="5,000">
-      <span class="money-unit">만원</span>
-    </div>
-  </div>
-
-  <div class="field">
     <label class="field-label">보금자리론 유형</label>
     <span class="field-hint">다자녀·전세사기는 4억 한도 / 생애최초는 위에서 자동 처리</span>
     <div class="opt-grid cols-3" data-name="loanType">
@@ -956,7 +947,6 @@ body::after {
     </div>
     <div class="field">
       <label class="field-label">가전·가구 (가정값)</label>
-      <span class="field-hint">신축이면 더 들 수 있음</span>
       <div class="money-input-wrap">
         <input type="text" inputmode="numeric" class="money-input" id="furniture" value="1,500">
         <span class="money-unit">만원</span>
@@ -1074,7 +1064,6 @@ body::after {
     </div>
     <div class="r-card">
       <div class="r-card-label">가전·가구</div>
-      <div class="r-card-sub">신축이면 더 들 수 있음</div>
       <div class="r-card-value"><span id="rCashFurniture">0</span><span class="unit">만원</span></div>
     </div>
     <div class="r-card full highlight">
@@ -1132,7 +1121,7 @@ const DEFAULTS = {
   debt1: 0, debt2: 0, debt3: 0, debt4: 0, debt5: 0,
   price: 90000, kbPrice: 88000, area: 84,
   zone: 'normal',
-  firstHome: 'X', noHouse: 'O', coupleIncome: 5000, loanType: 'general',
+  firstHome: 'X', noHouse: 'O', loanType: 'general',
   rateType: 'variable', loanYears: 30, rate: 4.0,
   monthlyExpense: 2500000, furniture: 1500
 };
@@ -1194,7 +1183,7 @@ function autoLoad() {
 const moneyIds = [
   'cash', 'stock', 'jeonseDeposit', 'jeonseLoan', 'parentSupport',
   'salary', 'debt1', 'debt2', 'debt3', 'debt4', 'debt5',
-  'price', 'kbPrice', 'coupleIncome', 'furniture', 'monthlyExpense'
+  'price', 'kbPrice', 'furniture', 'monthlyExpense'
 ];
 moneyIds.forEach(id => {
   const el = document.getElementById(id);
@@ -1321,7 +1310,7 @@ function compute() {
   // 5. 보금자리론 자격 (Q 섹션)
   const isQualified = (
     s.noHouse === 'O' &&
-    s.coupleIncome <= RULES.bogeumIncomeMax &&
+    s.salary <= RULES.bogeumIncomeMax &&
     s.price <= RULES.bogeumPriceMax
   );
 
@@ -1357,7 +1346,7 @@ function compute() {
     }
 
     // DTI 한도
-    const bogeumMonthlyLimit = (s.coupleIncome * 10000 * RULES.bogeumDti / 12) - debtMonthly;
+    const bogeumMonthlyLimit = (s.salary * 10000 * RULES.bogeumDti / 12) - debtMonthly;
     const bogeumRate = (s.rate / 100) / 12;
     const dtiLimit = bogeumMonthlyLimit > 0
       ? Math.max(0, PV(bogeumRate, totalMonths, bogeumMonthlyLimit) / 10000)
